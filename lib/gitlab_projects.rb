@@ -112,8 +112,7 @@ class GitlabProjects
     # destination namespace must exist
     namespaced_path = File.join(repos_path, new_namespace)
     unless File.exists?(namespaced_path)
-      $logger.error "fork-project failed: destination namespace <#{namespaced_path}> does not exist."
-      return false
+      FileUtils.mkdir_p(namespaced_path, mode: 0770)
     end
 
     # a project of the same name cannot already be within the destination namespace
