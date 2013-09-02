@@ -15,7 +15,7 @@ class GitlabUpdate
 
     @key_id = key_id
     @refname = refname
-    @branch_name = /refs\/heads\/([\w\.-]+)/.match(refname).to_a.last
+    @branch_name = /refs\/heads\/([\/\w\.-]+)/.match(refname).to_a.last
 
     @oldrev  = ARGV[1]
     @newrev  = ARGV[2]
@@ -27,7 +27,7 @@ class GitlabUpdate
     ENV['GL_ID'] = nil
 
     # If its push over ssh
-    # we need to check user persmission per branch first
+    # we need to check user permission per branch first
     if ssh?
       if api.allowed?('git-receive-pack', @repo_name, @key_id, @branch_name)
         update_redis

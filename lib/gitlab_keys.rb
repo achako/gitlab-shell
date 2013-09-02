@@ -1,4 +1,4 @@
-require 'open3'
+require 'tempfile'
 
 require_relative 'gitlab_config'
 require_relative 'gitlab_logger'
@@ -17,6 +17,7 @@ class GitlabKeys
     case @command
     when 'add-key'; add_key
     when 'rm-key';  rm_key
+    when 'clear';  clear
     else
       $logger.warn "Attempt to execute invalid gitlab-keys command #{@command.inspect}."
       puts 'not allowed'
@@ -35,7 +36,13 @@ class GitlabKeys
 
   def rm_key
     $logger.info "Removing key #{@key_id}"
-    cmd = "sed -i '/shell #{@key_id}\"/d' #{auth_file}"
-    system(cmd)
+    Tempfile.open('authorized_keys') do |temp|
+      cmd = "sed '/shell #{@key_id}\"/d' #{auth_file} > #{temp.path} && mv #{temp.path} #{auth_file}"
+      system(cmd)
+    end
+  end
+
+  def clear
+    system("echo '# Managed by gitlab-shell' > #{auth_file}")
   end
 end
